@@ -1,0 +1,81 @@
+// 6b.js - Backend + SPA RESTful API
+
+const express = require('express');
+const app = express();
+
+app.use(express.json());              // Parse JSON bodies
+app.use(express.static('public'));    // Serve static files from 'public' folder
+
+let items = ["Apple", "Banana"];      // Sample data
+
+// GET all items
+app.get('/api/items', (req, res) => res.json(items));
+
+// POST a new item
+app.post('/api/items', (req, res) => {
+  items.push(req.body.name);
+  res.json(items);
+});
+
+// Start server
+app.listen(3000, () => console.log(' Server running at http://localhost:3000'));
+------------------------------------------------------------------------------------------
+public/index.html
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Items</h2>
+  <ul id="list"></ul>
+  <input id="item" placeholder="New item">
+  <button onclick="addItem()">Add</button>
+
+  <script>
+    // Load items from API
+    async function load() {  
+      const res = await fetch('/api/items');  
+      const data = await res.json();
+      document.getElementById('list').innerHTML = data.map(i => <li>${i}</li>).join('');
+    }
+
+    // Add new item
+    async function addItem() {  
+      const itemName = document.getElementById('item').value;
+      if (!itemName) return;
+      await fetch('/api/items', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name: itemName})
+      });
+      document.getElementById('item').value = '';
+      load();  // Reload list
+    }
+
+    load(); // Initial load
+  </script>
+</body>
+</html>
+------------------------------------------
+Commands to Run
+# 1. Initialize npm project (if not done)
+npm init -y
+
+# 2. Install express
+npm install express
+
+# 3. Create 'public' folder and save index.html inside it
+
+# 4. Run the server
+node 6b.js
+
+# 5. Open browser
+http://localhost:3000
+
+Output Example
+Initial list:
+Apple
+Banana
+
+After adding "Orange":
+Apple
+Banana
+Orange
