@@ -1,0 +1,127 @@
+// 6A.js - MongoDB CRUD Example using Mongoose
+
+const express = require('express');
+const mongoose = require('mongoose');
+
+const app = express();
+app.use(express.json()); // For parsing JSON data
+
+// Connect to MongoDB
+mongoose.connect('mongodb://127.0.0.1:27017/mydb')
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch(err => console.log(err));
+
+// Create Schema & Model
+const UserSchema = new mongoose.Schema({
+  name: String,
+  email: String
+});
+
+const User = mongoose.model('User', UserSchema);
+
+// ------------------ CRUD Routes ------------------
+
+// CREATE (POST)
+app.post('/users', async (req, res) => {
+  const user = new User(req.body);
+  await user.save();
+  res.send(user);
+});
+
+// READ (GET)
+app.get('/users', async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+});
+
+// UPDATE (PUT)
+app.put('/users/:id', async (req, res) => {
+  const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  res.send(user);
+});
+
+// DELETE (DELETE)
+app.delete('/users/:id', async (req, res) => {
+  await User.findByIdAndDelete(req.params.id);
+  res.send({ message: 'User deleted' });
+});
+
+// Start Server
+app.listen(3000, () => console.log('🚀 Server running on port 3000'));
+
+/*
+Steps to Run:
+
+1. Check Node.js and npm versions:
+   node -v
+   npm -v
+
+2. Initialize npm project (if not already):
+   npm init -y
+
+3. Install dependencies:
+   npm install express mongoose
+
+4. Start MongoDB server locally:
+   mongod
+
+5. Run the program:
+   node 6A.js
+
+6. Test API using Postman:
+
+- Create User (POST):
+  URL: http://localhost:3000/users
+  Body (JSON):
+  {
+    "name": "Alice",
+    "email": "alice@test.com"
+  }
+
+- Get Users (GET):
+  URL: http://localhost:3000/users
+
+- Update User (PUT):
+  URL: http://localhost:3000/users/<user_id>
+  Body (JSON):
+  {
+    "name": "Alice Updated",
+    "email": "alice.new@test.com"
+  }
+
+- Delete User (DELETE):
+  URL: http://localhost:3000/users/<user_id>
+
+Example Output:
+
+POST /users
+{
+  "_id": "66a90f4a8c1b3f18f92c1a23",
+  "name": "Alice",
+  "email": "alice@test.com",
+  "__v": 0
+}
+
+GET /users
+[
+  {
+    "_id": "66a90f4a8c1b3f18f92c1a23",
+    "name": "Alice",
+    "email": "alice@test.com",
+    "__v": 0
+  }
+]
+
+PUT /users/66a90f4a8c1b3f18f92c1a23
+{
+  "_id": "66a90f4a8c1b3f18f92c1a23",
+  "name": "Alice Updated",
+  "email": "alice.new@test.com",
+  "__v": 0
+}
+
+DELETE /users/66a90f4a8c1b3f18f92c1a23
+{
+  "message": "User deleted"
+}
+*/
